@@ -1,0 +1,60 @@
+# Build results
+bin/
+obj/
+out/
+[Aa]rtifacts/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+.vscode/
+*.code-workspace
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+*.testresults
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish output
+publish/
+wwwroot/dist/
+wwwroot/lib/
+
+# Configuration
+appsettings.*.json
+
+# Secrets
+secrets.json
+*.pfx
+*.cer
+*.key
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Docker
+docker-compose.override.yml
