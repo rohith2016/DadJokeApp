@@ -1,0 +1,25 @@
+﻿using Domain.Interfaces;
+using Infrastructure.ExternalService;
+using Infrastructure.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Infrastructure
+{
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddCoreServices(this IServiceCollection services)
+        {
+            // Register repositories
+            services.AddScoped<IJokeRepository, JokeRepository>();
+
+            //// Register domain services
+            //services.AddScoped<IJokeLengthClassifier, JokeLengthClassifier>();
+            //services.AddScoped<IJokeHighlighter, JokeHighlighter>();
+
+            // Register HTTP client for API
+            services.AddHttpClient<IJokeApiClient, DadJokeApiClient>();
+
+            return services;
+        }
+    }
+}

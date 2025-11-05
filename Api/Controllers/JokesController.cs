@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -21,9 +22,9 @@ namespace Api.Controllers
         [HttpGet("random")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<JokeDto>> GetRandomJoke()
+        public async Task<ActionResult<JokeDTO>> GetRandomJoke()
         {
-            var joke = await _jokeService.GetRandomJokeAsync();
+            JokeDTO joke = await _jokeService.GetRandomJokeAsync();
             return Ok(joke);
         }
 
@@ -31,7 +32,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<GroupedJokesDto>> SearchJokes([FromQuery] string term)
+        public async Task<ActionResult<GroupedJokesDTO>> SearchJokes([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
             {
@@ -43,7 +44,7 @@ namespace Api.Controllers
                 return BadRequest("Search term too long");
             }
 
-            var result = await _searchService.SearchJokesAsync(term);
+            GroupedJokesDTO result = await _searchService.SearchJokesAsync(term);
             return Ok(result);
         }
     }
