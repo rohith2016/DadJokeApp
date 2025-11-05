@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Search;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,23 +29,23 @@ namespace Api.Controllers
             return Ok(joke);
         }
 
-        [HttpGet("search")]
+        [HttpPost("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<GroupedJokesDTO>> SearchJokes([FromQuery] string term)
+        public async Task<ActionResult<GroupedJokesDTO>> SearchJokes([FromBody] SearchRequestDTO searchRequest)
         {
-            if (string.IsNullOrWhiteSpace(term))
+            if (string.IsNullOrWhiteSpace(searchRequest.Term))
             {
                 return BadRequest("Search term is required");
             }
 
-            if (term.Length > 100)
+            if (searchRequest.Term.Length > 100)
             {
                 return BadRequest("Search term too long");
             }
 
-            GroupedJokesDTO result = await _searchService.SearchJokesAsync(term);
+            GroupedJokesDTO result = await _searchService.SearchJokesAsync(searchRequest);
             return Ok(result);
         }
     }

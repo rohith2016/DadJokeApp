@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Search;
 using Application.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Application.Services
 {
     internal class JokeSearchService : IJokeSearchService
     {
-        public Task<GroupedJokesDTO> SearchJokesAsync(string term)
+        public Task<GroupedJokesDTO> SearchJokesAsync(SearchRequestDTO searchRequest)
         {
             throw new NotImplementedException();
         }

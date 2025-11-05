@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Search;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace Application.Interfaces
 {
     public interface IJokeSearchService
     {
-        Task<GroupedJokesDTO> SearchJokesAsync(string term);
+        Task<GroupedJokesDTO> SearchJokesAsync(SearchRequestDTO searchRequest);
     }
 }
