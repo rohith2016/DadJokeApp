@@ -4,11 +4,6 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enum;
 using Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -34,13 +29,13 @@ namespace Application.Services
         public async Task<GroupedJokesDTO> SearchJokesAsync(SearchRequestDTO searchRequest)
         {
             // Step 1: Search database first
-            var dbJokes = await _repository.SearchJokesAsync(searchRequest.Term);
+            var dbJokes = await _repository.SearchJokesAsync(searchRequest.Term, searchRequest.Limit);
             var allJokes = new List<Joke>(dbJokes);
 
-            // Step 2: If less than 30 jokes found, fetch from API
-            if (dbJokes.Count < 30)
+            // Step 2: If less than the user choosen limit of jokes found, fetch from API
+            if (dbJokes.Count < searchRequest.Limit)
             {
-                var apiResponse = await _apiClient.SearchJokesAsync(searchRequest.Term,searchRequest.Limit, searchRequest.Page);
+                var apiResponse = await _apiClient.SearchJokesAsync(searchRequest.Term, searchRequest.Limit, searchRequest.Page);
 
                 var existingJokeIds = dbJokes.Select(j => j.JokeId).ToHashSet();
                 var newJokes = new List<Joke>();
@@ -72,11 +67,11 @@ namespace Application.Services
                     await _repository.SaveJokesBatchAsync(newJokes, searchRequest.Term);
                 }
             }
-            else
-            {
-                // Track search term even if we didn't hit API
-                await _repository.TrackSearchTermAsync(searchRequest.Term);
-            }
+            //else
+            //{
+            //    // Track search term even if we didn't hit API
+            //    await _repository.TrackSearchTermAsync(searchRequest.Term);
+            //}
 
             // Step 4: Apply highlighting to all jokes
             var jokesWithHighlight = allJokes

@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Enum;
+using Domain.Helpers;
 using Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
@@ -10,34 +11,34 @@ namespace Infrastructure.Repositories
     {
         private readonly IConfiguration _config;
         private readonly string _connectionString;
-        public JokeRepository(IConfiguration config)
+        private readonly JokesTableHelper _sqlHelper;
+        public JokeRepository(IConfiguration config, JokesTableHelper helper)
         { 
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection") ?? "";
+            _sqlHelper = helper;
         }
 
-        public async Task<List<Joke>> SearchJokesAsync(string searchTerm)
+        public async Task<List<Joke>> SearchJokesAsync(string searchTerm, int limit)
         {
             var jokes = new List<Joke>();
 
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var sql = @"
-                SELECT Id, JokeId, JokeText, WordCount, JokeLength, CreatedAt, LastAccessedAt
-                FROM Jokes
-                WHERE JokeText ILIKE @SearchTerm
-                ORDER BY LastAccessedAt DESC
-                LIMIT 30";
+            var sql = _sqlHelper.SearchJokesSql();
 
             using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+            command.Parameters.AddWithValue("@SearchTerm", searchTerm);
+            command.Parameters.AddWithValue("@Limit", limit);
 
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 jokes.Add(MapToJoke(reader));
             }
+
+            await reader.CloseAsync();
 
             if (jokes.Any())
             {
@@ -52,7 +53,7 @@ namespace Infrastructure.Repositories
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var checkSql = "SELECT COUNT(1) FROM Jokes WHERE JokeId = @JokeId";
+            var checkSql = _sqlHelper.CheckJokeExistsSql();
             using var checkCommand = new NpgsqlCommand(checkSql, connection);
             checkCommand.Parameters.AddWithValue("@JokeId", joke.JokeId);
 
@@ -60,7 +61,7 @@ namespace Infrastructure.Repositories
 
             if (exists)
             {
-                var updateSql = "UPDATE Jokes SET LastAccessedAt = @LastAccessedAt WHERE JokeId = @JokeId";
+                var updateSql = _sqlHelper.UpdateLastAccessedSql();
                 using var updateCommand = new NpgsqlCommand(updateSql, connection);
                 updateCommand.Parameters.AddWithValue("@LastAccessedAt", DateTime.UtcNow);
                 updateCommand.Parameters.AddWithValue("@JokeId", joke.JokeId);
@@ -68,9 +69,7 @@ namespace Infrastructure.Repositories
             }
             else
             {
-                var insertSql = @"
-                    INSERT INTO Jokes (Id, JokeId, JokeText, WordCount, JokeLength, CreatedAt, LastAccessedAt)
-                    VALUES (@Id, @JokeId, @JokeText, @WordCount, @JokeLength, @CreatedAt, @LastAccessedAt)";
+                var insertSql = _sqlHelper.InsertJokeSql();
 
                 using var insertCommand = new NpgsqlCommand(insertSql, connection);
                 AddJokeParameters(insertCommand, joke);
@@ -87,8 +86,7 @@ namespace Infrastructure.Repositories
 
             try
             {
-                var jokeIds = string.Join(",", jokes.Select(j => $"'{j.JokeId}'"));
-                var checkSql = $"SELECT JokeId FROM Jokes WHERE JokeId IN ({jokeIds})";
+                var checkSql = _sqlHelper.CheckExistingJokeIdsSql(jokes);
 
                 var existingJokeIds = new HashSet<string>();
                 using (var checkCommand = new NpgsqlCommand(checkSql, connection, transaction))
@@ -104,9 +102,7 @@ namespace Infrastructure.Repositories
 
                 if (newJokes.Any())
                 {
-                    var insertSql = @"
-                        INSERT INTO Jokes (Id, JokeId, JokeText, WordCount, JokeLength, CreatedAt, LastAccessedAt)
-                        VALUES (@Id, @JokeId, @JokeText, @WordCount, @JokeLength, @CreatedAt, @LastAccessedAt)";
+                    var insertSql = _sqlHelper.InsertJokeSql();
 
                     foreach (var joke in newJokes)
                     {
@@ -118,17 +114,14 @@ namespace Infrastructure.Repositories
 
                 if (existingJokeIds.Any())
                 {
-                    var updateSql = $@"
-                        UPDATE Jokes 
-                        SET LastAccessedAt = @LastAccessedAt 
-                        WHERE JokeId IN ({jokeIds})";
+                    var updateSql = _sqlHelper.BulkUpdateLastAccessedSql(jokes);
 
                     using var updateCommand = new NpgsqlCommand(updateSql, connection, transaction);
                     updateCommand.Parameters.AddWithValue("@LastAccessedAt", DateTime.UtcNow);
                     await updateCommand.ExecuteNonQueryAsync();
                 }
 
-                await TrackSearchTermInternalAsync(connection, transaction, searchTerm);
+                //await TrackSearchTermInternalAsync(connection, transaction, searchTerm);
 
                 await transaction.CommitAsync();
             }
@@ -200,13 +193,18 @@ namespace Infrastructure.Repositories
 
         private async Task UpdateLastAccessedAsync(NpgsqlConnection connection, List<Guid> jokeIds)
         {
-            var ids = string.Join(",", jokeIds.Select(id => $"'{id}'"));
-            var sql = $"UPDATE Jokes SET LastAccessedAt = @LastAccessedAt WHERE Id IN ({ids})";
+            if (jokeIds == null || jokeIds.Count == 0)
+                return;
+
+            var sql =_sqlHelper.UpdateLastAccessedByIdsSql(jokeIds);
 
             using var command = new NpgsqlCommand(sql, connection);
             command.Parameters.AddWithValue("@LastAccessedAt", DateTime.UtcNow);
+            command.Parameters.AddWithValue("@Ids", jokeIds);
+
             await command.ExecuteNonQueryAsync();
         }
+
 
         private void AddJokeParameters(NpgsqlCommand command, Joke joke)
         {
