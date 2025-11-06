@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Services;
 using Infrastructure.ExternalService;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,9 +13,9 @@ namespace Infrastructure
             // Register repositories
             services.AddScoped<IJokeRepository, JokeRepository>();
 
-            //// Register domain services
-            //services.AddScoped<IJokeLengthClassifier, JokeLengthClassifier>();
-            //services.AddScoped<IJokeHighlighter, JokeHighlighter>();
+            // Register domain services
+            services.AddScoped<IJokeClassifier, JokeClassifier>();
+            services.AddScoped<IJokeHighlighter, JokeHighlighter>();
 
             // Register HTTP client for API
             services.AddHttpClient<IJokeApiClient, DadJokeApiClient>();

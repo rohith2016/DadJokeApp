@@ -1,13 +1,17 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Infrastructure.ExternalService.Models
+namespace Domain.Models
 {
-    public class DadJoke
+    public class DadJokeApiResponse
     {
+
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("joke")]
         public string Joke { get; set; } = string.Empty;
+        
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
     }
 }

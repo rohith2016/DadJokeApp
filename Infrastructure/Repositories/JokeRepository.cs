@@ -1,5 +1,4 @@
-﻿
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Enum;
 using Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -57,7 +56,7 @@ namespace Infrastructure.Repositories
             using var checkCommand = new NpgsqlCommand(checkSql, connection);
             checkCommand.Parameters.AddWithValue("@JokeId", joke.JokeId);
 
-            var exists = (long)(await checkCommand.ExecuteScalarAsync()) > 0;
+            var exists = (long)(await checkCommand.ExecuteScalarAsync() ?? 0) > 0;
 
             if (exists)
             {

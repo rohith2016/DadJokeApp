@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Infrastructure.ExternalService.Models
+namespace Domain.Models
 {
     public class DadJokeSearchResponse
     {

@@ -50,7 +50,7 @@ namespace Application.Services
                 }
                 catch
                 {
-                    // Log error but don't block response
+                    //Logerror 
                 }
             });
 
