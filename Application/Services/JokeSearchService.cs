@@ -35,7 +35,7 @@ namespace Application.Services
             // Step 2: If less than the user choosen limit of jokes found, fetch from API
             if (dbJokes.Count < searchRequest.Limit)
             {
-                var apiResponse = await _apiClient.SearchJokesAsync(searchRequest.Term, searchRequest.Limit, searchRequest.Page);
+                var apiResponse = await _apiClient.SearchJokesAsync(searchRequest.Term, searchRequest.Limit, searchRequest.Page);// no subtraction as the api could get jokes we already have.
 
                 var existingJokeIds = dbJokes.Select(j => j.JokeId).ToHashSet();
                 var newJokes = new List<Joke>();
@@ -67,15 +67,11 @@ namespace Application.Services
                     await _repository.SaveJokesBatchAsync(newJokes, searchRequest.Term);
                 }
             }
-            //else
-            //{
-            //    // Track search term even if we didn't hit API
-            //    await _repository.TrackSearchTermAsync(searchRequest.Term);
-            //}
+            // Track search term even if we didn't hit API
+            await _repository.TrackSearchTermAsync(searchRequest.Term);
 
             // Step 4: Apply highlighting to all jokes
             var jokesWithHighlight = allJokes
-                .Take(30)
                 .Select(j => new Joke
                 {
                     Id = j.Id,
@@ -90,30 +86,27 @@ namespace Application.Services
 
             // Step 5: Group by length
             var grouped = jokesWithHighlight
-                .GroupBy(j => j.JokeLength)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(j => new JokeDTO
-                    {
-                        Id = j.JokeId,
-                        Text = j.JokeText,
-                        Length = j.JokeLength.ToString()
-                    }).ToList()
-                );
+            .GroupBy(j => j.JokeLength)
+            .Select(g => new ClassifiedJokes
+            {
+                LengthCategory = g.Key.ToString(),
+                Count = g.Count(),
+                Jokes = g.Select(j => new JokeDTO
+                {
+                    Id = j.JokeId,
+                    Text = j.JokeText,
+                    Length = j.JokeLength.ToString()
+                }).ToList()
+            })
+            .ToList();
 
             // Step 6: Return grouped results
             return new GroupedJokesDTO
             {
-                Short = grouped.ContainsKey(JokeLength.Short)
-                    ? grouped[JokeLength.Short]
-                    : new List<JokeDTO>(),
-                Medium = grouped.ContainsKey(JokeLength.Medium)
-                    ? grouped[JokeLength.Medium]
-                    : new List<JokeDTO>(),
-                Long = grouped.ContainsKey(JokeLength.Long)
-                    ? grouped[JokeLength.Long]
-                    : new List<JokeDTO>()
+                TotalJokes = jokesWithHighlight.Count,
+                ClassifiedJokes = grouped
             };
+
         }
     }
 }

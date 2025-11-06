@@ -22,6 +22,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{61C57658-936F-4E89-A1BD-00304F07B313}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A077E20C-4071-4F92-A46C-72A1FA25405A}"
+	ProjectSection(SolutionItems) = preProject
+		001_CreateJokesTable.sql = 001_CreateJokesTable.sql
+		002_CreateSearchTermsTable.sql = 002_CreateSearchTermsTable.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +66,7 @@ Global
 		{EF9516F0-AD88-410D-A172-F3DF164C6C2C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{81E45238-80F4-4973-83AE-851B1DCBE9C2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B15391B2-25C1-4249-92CE-7BFCA7A22E86} = {51DC4EA6-964D-4BC3-8F07-4BAB1AB0199E}
+		{A077E20C-4071-4F92-A46C-72A1FA25405A} = {61C57658-936F-4E89-A1BD-00304F07B313}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6653F7F1-5C1F-4574-9786-00A7F1ECE844}

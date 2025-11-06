@@ -121,8 +121,6 @@ namespace Infrastructure.Repositories
                     await updateCommand.ExecuteNonQueryAsync();
                 }
 
-                //await TrackSearchTermInternalAsync(connection, transaction, searchTerm);
-
                 await transaction.CommitAsync();
             }
             catch

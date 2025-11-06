@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Helpers;
+using Domain.Interfaces;
 using Domain.Services;
 using Infrastructure.ExternalService;
 using Infrastructure.Repositories;
@@ -10,6 +11,9 @@ namespace Infrastructure
     {
         public static IServiceCollection AddCoreServices(this IServiceCollection services)
         {
+            //Register helpers
+            services.AddSingleton<JokesTableHelper>();
+
             // Register repositories
             services.AddScoped<IJokeRepository, JokeRepository>();
 

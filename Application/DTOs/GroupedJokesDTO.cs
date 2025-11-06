@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.DTOs
+﻿namespace Application.DTOs
 {
     public class GroupedJokesDTO
     {
-        public List<JokeDTO> Short { get; set; } = new List<JokeDTO>();
-        public List<JokeDTO> Medium { get; set; } = new List<JokeDTO>();
-        public List<JokeDTO> Long { get; set; } = new List<JokeDTO>();
+        public int TotalJokes { get; set; } = 0;
+        public List<ClassifiedJokes> ClassifiedJokes { get; set; } = new List<ClassifiedJokes>();
+    }
+
+    public class ClassifiedJokes
+    {
+        public string LengthCategory { get; set; } = string.Empty;
+        public int Count { get; set; } 
+        public List<JokeDTO> Jokes { get; set; } = new List<JokeDTO>();
     }
 }

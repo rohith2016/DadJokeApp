@@ -26,12 +26,12 @@ namespace Domain.Services
                 }
 
                 var originalTerm = jokeText.Substring(index, termLength);
-                var highlighted = $"<<{originalTerm}>>";
+                var highlighted = $"<b>{originalTerm}</b>";
 
                 result = result.Remove(index + offset, termLength);
                 result = result.Insert(index + offset, highlighted);
 
-                offset += 4; // Length of "<<" + ">>"
+                offset += 7; // Length of "<b>" + "</b>"
                 startIndex = index + termLength;
             }
 
