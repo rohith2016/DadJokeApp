@@ -1,11 +1,9 @@
-﻿using Application.Interfaces;
+﻿using Application.Cache;
+using Application.Interfaces;
 using Application.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+
 
 namespace Application
 {
@@ -15,6 +13,7 @@ namespace Application
         {
             services.AddScoped<IJokeService, JokeService>();
             services.AddScoped<IJokeSearchService, JokeSearchService>();
+            services.AddScoped<ICacheService, MemoryCacheService>();
 
             return services;
         }

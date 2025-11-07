@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enum;
 using Domain.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Services
 {
@@ -13,21 +14,33 @@ namespace Application.Services
         private readonly IJokeApiClient _apiClient;
         private readonly IJokeClassifier _classifier;
         private readonly IJokeHighlighter _highlighter;
+        private readonly ICacheService _cacheService;
 
         public JokeSearchService(
             IJokeRepository repository,
             IJokeApiClient apiClient,
             IJokeClassifier classifier,
-            IJokeHighlighter highlighter)
+            IJokeHighlighter highlighter,
+            ICacheService cacheService)
         {
             _repository = repository;
             _apiClient = apiClient;
             _classifier = classifier;
             _highlighter = highlighter;
+            _cacheService = cacheService;
         }
 
         public async Task<GroupedJokesDTO> SearchJokesAsync(SearchRequestDTO searchRequest)
         {
+            string cacheKey = $"search_{searchRequest.Term.Trim().ToLower()}_{searchRequest.Limit}";
+            var cachedResult = _cacheService.Get<GroupedJokesDTO>(cacheKey);
+
+            if (cachedResult != null)
+            {
+                await _repository.TrackSearchTermAsync(searchRequest.Term);
+                return cachedResult;
+            }
+
             // Step 1: Search database first
             var dbJokes = await _repository.SearchJokesAsync(searchRequest.Term, searchRequest.Limit);
             var allJokes = new List<Joke>(dbJokes);
@@ -101,11 +114,14 @@ namespace Application.Services
             .ToList();
 
             // Step 6: Return grouped results
-            return new GroupedJokesDTO
+            var result = new GroupedJokesDTO
             {
                 TotalJokes = jokesWithHighlight.Count,
                 ClassifiedJokes = grouped
             };
+
+            _cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15));
+            return result;
 
         }
     }
