@@ -1,3 +1,4 @@
+using Api.Middlewares;
 using Api.Validations;
 using Application;
 using FluentValidation;
@@ -36,10 +37,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors("AllowAngular");
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular");
 
 app.UseAuthorization();
 

@@ -1,5 +1,7 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Domain.Models.Exceptions;
+using Domain.Models.Exceptions.Domain.Models.Exceptions;
 using Microsoft.Extensions.Logging;
 using Polly.RateLimit;
 using System.Net.Http.Json;
@@ -35,20 +37,13 @@ namespace Infrastructure.ExternalService
                 _logger.LogInformation("Fetched random joke successfully with ID: {JokeId}", joke.Id);
                 return joke;
             }
-            catch (RateLimitRejectedException ex)
+            catch (RateLimitRejectedException)
             {
-                _logger.LogError(ex, "Rate limit exceeded for Dad Joke API.");
-                throw new Exception("Too many requests to Dad Joke API. Please try again later.", ex);
+                throw new TooManyRequestsException("Too many requests to Dad Joke API. Please try again later.");
             }
-            catch (HttpRequestException ex)
+            catch (TaskCanceledException)
             {
-                _logger.LogError(ex, "HTTP error while fetching random joke from API.");
-                throw new Exception($"Error fetching random joke from API: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                _logger.LogError(ex, "Request to Dad Joke API timed out.");
-                throw new Exception("Request to Dad Joke API timed out", ex);
+                throw new ApiTimeoutException("Request to Dad Joke API timed out.");
             }
             catch (Exception ex)
             {
@@ -79,20 +74,13 @@ namespace Infrastructure.ExternalService
                 _logger.LogInformation("Fetched {Count} jokes for term '{Term}'", searchResult.Results?.Count ?? 0, searchTerm);
                 return searchResult;
             }
-            catch (RateLimitRejectedException ex)
+            catch (RateLimitRejectedException)
             {
-                _logger.LogError(ex, "Rate limit exceeded for Dad Joke API search.");
-                throw new Exception("Too many requests to Dad Joke API. Please try again later.", ex);
+                throw new TooManyRequestsException("Too many requests to Dad Joke API. Please try again later.");
             }
-            catch (HttpRequestException ex)
+            catch (TaskCanceledException)
             {
-                _logger.LogError(ex, "HTTP error while searching jokes for term '{Term}'", searchTerm);
-                throw new Exception($"Error searching jokes from API: {ex.Message}", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                _logger.LogError(ex, "Request to Dad Joke API timed out for term '{Term}'", searchTerm);
-                throw new Exception("Request to Dad Joke API timed out", ex);
+                throw new ApiTimeoutException("Request to Dad Joke API timed out.");
             }
             catch (Exception ex)
             {
