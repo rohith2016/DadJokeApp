@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Search;
 using Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -11,13 +12,16 @@ namespace Api.Controllers
     {
         private readonly IJokeService _jokeService;
         private readonly IJokeSearchService _searchService;
+        private readonly IServiceProvider _serviceProvider;
 
         public JokesController(
             IJokeService jokeService,
-            IJokeSearchService searchService)
+            IJokeSearchService searchService,
+            IServiceProvider serviceProvider)
         {
             _jokeService = jokeService;
             _searchService = searchService;
+            _serviceProvider = serviceProvider;
         }
 
         [HttpGet("random")]
@@ -35,16 +39,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GroupedJokesDTO>> SearchJokes([FromBody] SearchRequestDTO searchRequest)
         {
-            if (string.IsNullOrWhiteSpace(searchRequest.Term))
-            {
-                return BadRequest("Search term is required");
-            }
-
-            if (searchRequest.Term.Length > 100)
-            {
-                return BadRequest("Search term too long");
-            }
-
+            var validator = _serviceProvider.GetRequiredService<IValidator<SearchRequestDTO>>();
+            var validationResult = await validator.ValidateAsync(searchRequest);
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            
             GroupedJokesDTO result = await _searchService.SearchJokesAsync(searchRequest);
             return Ok(result);
         }

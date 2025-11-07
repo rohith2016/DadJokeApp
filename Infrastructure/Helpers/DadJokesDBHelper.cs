@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Domain.Helpers
 {
-    internal class JokesTableHelper
+    internal class DadJokesDBHelper
     {
         private readonly string _jokesTable;
         private readonly string _searchTermsTable;
 
-        public JokesTableHelper(IConfiguration configuration)
+        public DadJokesDBHelper(IConfiguration configuration)
         {
             _jokesTable = configuration["JokesTable"] ?? "Jokes";
             _searchTermsTable = configuration["SearchTermsTable"] ?? "SearchTerms";

@@ -5,6 +5,8 @@ namespace Domain.Services
 {
     public class JokeClassifier: IJokeClassifier
     {
+        private static readonly char[] separator = new[] { ' ', '\t', '\n', '\r' };
+
         public JokeLength ClassifyJoke(string jokeText)
         {
             var wordCount = CountWords(jokeText);
@@ -30,7 +32,7 @@ namespace Domain.Services
                 return 0;
             }
 
-            var words = jokeText.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var words = jokeText.Split(separator, StringSplitOptions.RemoveEmptyEntries);
             return words.Length;
         }
     }

@@ -12,7 +12,7 @@ namespace Infrastructure
         public static IServiceCollection AddCoreServices(this IServiceCollection services)
         {
             //Register helpers
-            services.AddSingleton<JokesTableHelper>();
+            services.AddSingleton<DadJokesDBHelper>();
 
             // Register repositories
             services.AddScoped<IJokeRepository, JokeRepository>();

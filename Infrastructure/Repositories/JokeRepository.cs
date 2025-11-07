@@ -11,8 +11,8 @@ namespace Infrastructure.Repositories
     {
         private readonly IConfiguration _config;
         private readonly string _connectionString;
-        private readonly JokesTableHelper _sqlHelper;
-        public JokeRepository(IConfiguration config, JokesTableHelper helper)
+        private readonly DadJokesDBHelper _sqlHelper;
+        public JokeRepository(IConfiguration config, DadJokesDBHelper helper)
         { 
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection") ?? "";
@@ -145,7 +145,7 @@ namespace Infrastructure.Repositories
             NpgsqlTransaction transaction,
             string searchTerm)
         {
-            var checkSql = "SELECT Id, SearchCount FROM SearchTerms WHERE LOWER(Term) = LOWER(@Term)";
+            var checkSql = _sqlHelper.CheckSearchTermExistsSql();
             using var checkCommand = new NpgsqlCommand(checkSql, connection, transaction);
             checkCommand.Parameters.AddWithValue("@Term", searchTerm);
 
@@ -163,10 +163,7 @@ namespace Infrastructure.Repositories
 
             if (termId.HasValue)
             {
-                var updateSql = @"
-                    UPDATE SearchTerms 
-                    SET SearchCount = @SearchCount, LastSearchedAt = @LastSearchedAt 
-                    WHERE Id = @Id";
+                var updateSql = _sqlHelper.UpdateSearchTermSql();
 
                 using var updateCommand = new NpgsqlCommand(updateSql, connection, transaction);
                 updateCommand.Parameters.AddWithValue("@SearchCount", currentCount + 1);
@@ -176,9 +173,7 @@ namespace Infrastructure.Repositories
             }
             else
             {
-                var insertSql = @"
-                    INSERT INTO SearchTerms (Id, Term, SearchCount, LastSearchedAt)
-                    VALUES (@Id, @Term, @SearchCount, @LastSearchedAt)";
+                var insertSql = _sqlHelper.InsertSearchTermSql();
 
                 using var insertCommand = new NpgsqlCommand(insertSql, connection, transaction);
                 insertCommand.Parameters.AddWithValue("@Id", Guid.NewGuid());
@@ -204,7 +199,7 @@ namespace Infrastructure.Repositories
         }
 
 
-        private void AddJokeParameters(NpgsqlCommand command, Joke joke)
+        private static void AddJokeParameters(NpgsqlCommand command, Joke joke)
         {
             command.Parameters.AddWithValue("@Id", joke.Id);
             command.Parameters.AddWithValue("@JokeId", joke.JokeId);

@@ -1,4 +1,6 @@
+using Api.Validations;
 using Application;
+using FluentValidation;
 using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
+
+builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
 
 // Register services from other layers
 builder.Services.AddCoreServices();
