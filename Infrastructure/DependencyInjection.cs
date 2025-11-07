@@ -1,17 +1,19 @@
 ﻿using Domain.Helpers;
 using Domain.Interfaces;
 using Domain.Services;
+using Infrastructure.Extensions;
 using Infrastructure.ExternalService;
 using Infrastructure.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddCoreServices(this IServiceCollection services)
+        public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
         {
-            //Register helpers
+            // Register helpers
             services.AddSingleton<DadJokesDBHelper>();
 
             // Register repositories
@@ -21,8 +23,8 @@ namespace Infrastructure
             services.AddScoped<IJokeClassifier, JokeClassifier>();
             services.AddScoped<IJokeHighlighter, JokeHighlighter>();
 
-            // Register HTTP client for API
-            services.AddHttpClient<IJokeApiClient, DadJokeApiClient>();
+            // Register configured HTTP client
+            services.AddDadJokeApiClient(configuration);
 
             return services;
         }

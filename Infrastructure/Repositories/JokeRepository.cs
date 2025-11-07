@@ -3,6 +3,7 @@ using Domain.Enum;
 using Domain.Helpers;
 using Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Infrastructure.Repositories
@@ -12,37 +13,49 @@ namespace Infrastructure.Repositories
         private readonly IConfiguration _config;
         private readonly string _connectionString;
         private readonly DadJokesDBHelper _sqlHelper;
-        public JokeRepository(IConfiguration config, DadJokesDBHelper helper)
-        { 
+        private readonly ILogger<JokeRepository> _logger;
+
+        public JokeRepository(IConfiguration config, DadJokesDBHelper helper, ILogger<JokeRepository> logger)
+        {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection") ?? "";
             _sqlHelper = helper;
+            _logger = logger;
         }
 
         public async Task<List<Joke>> SearchJokesAsync(string searchTerm, int limit)
         {
+            _logger.LogInformation("Searching jokes for term '{Term}' with limit {Limit}", searchTerm, limit);
             var jokes = new List<Joke>();
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            var sql = _sqlHelper.SearchJokesSql();
-
-            using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@SearchTerm", searchTerm);
-            command.Parameters.AddWithValue("@Limit", limit);
-
-            using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            try
             {
-                jokes.Add(MapToJoke(reader));
+                using var connection = new NpgsqlConnection(_connectionString);
+                await connection.OpenAsync();
+
+                var sql = _sqlHelper.SearchJokesSql();
+
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@SearchTerm", searchTerm);
+                command.Parameters.AddWithValue("@Limit", limit);
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    jokes.Add(MapToJoke(reader));
+                }
+
+                await reader.CloseAsync();
+
+                if (jokes.Any())
+                {
+                    await UpdateLastAccessedAsync(connection, jokes.Select(j => j.Id).ToList());
+                }
             }
-
-            await reader.CloseAsync();
-
-            if (jokes.Any())
+            catch (Exception ex)
             {
-                await UpdateLastAccessedAsync(connection, jokes.Select(j => j.Id).ToList());
+                _logger.LogError(ex, "Error while searching jokes for term '{Term}'", searchTerm);
+                throw;
             }
 
             return jokes;
@@ -145,44 +158,68 @@ namespace Infrastructure.Repositories
             NpgsqlTransaction transaction,
             string searchTerm)
         {
-            var checkSql = _sqlHelper.CheckSearchTermExistsSql();
-            using var checkCommand = new NpgsqlCommand(checkSql, connection, transaction);
-            checkCommand.Parameters.AddWithValue("@Term", searchTerm);
+            var existing = await GetExistingSearchTermAsync(connection, transaction, searchTerm);
 
-            Guid? termId = null;
-            int currentCount = 0;
-
-            using (var reader = await checkCommand.ExecuteReaderAsync())
+            if (existing.HasValue)
             {
-                if (await reader.ReadAsync())
-                {
-                    termId = reader.GetGuid(0);
-                    currentCount = reader.GetInt32(1);
-                }
-            }
-
-            if (termId.HasValue)
-            {
-                var updateSql = _sqlHelper.UpdateSearchTermSql();
-
-                using var updateCommand = new NpgsqlCommand(updateSql, connection, transaction);
-                updateCommand.Parameters.AddWithValue("@SearchCount", currentCount + 1);
-                updateCommand.Parameters.AddWithValue("@LastSearchedAt", DateTime.UtcNow);
-                updateCommand.Parameters.AddWithValue("@Id", termId.Value);
-                await updateCommand.ExecuteNonQueryAsync();
+                await UpdateSearchTermAsync(connection, transaction, existing.Value.Id, existing.Value.Count);
             }
             else
             {
-                var insertSql = _sqlHelper.InsertSearchTermSql();
-
-                using var insertCommand = new NpgsqlCommand(insertSql, connection, transaction);
-                insertCommand.Parameters.AddWithValue("@Id", Guid.NewGuid());
-                insertCommand.Parameters.AddWithValue("@Term", searchTerm.ToLower());
-                insertCommand.Parameters.AddWithValue("@SearchCount", 1);
-                insertCommand.Parameters.AddWithValue("@LastSearchedAt", DateTime.UtcNow);
-                await insertCommand.ExecuteNonQueryAsync();
+                await InsertSearchTermAsync(connection, transaction, searchTerm);
             }
         }
+
+        private async Task<(Guid Id, int Count)?> GetExistingSearchTermAsync(
+            NpgsqlConnection connection,
+            NpgsqlTransaction transaction,
+            string searchTerm)
+        {
+            var sql = _sqlHelper.CheckSearchTermExistsSql();
+            using var command = new NpgsqlCommand(sql, connection, transaction);
+            command.Parameters.AddWithValue("@Term", searchTerm);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return (reader.GetGuid(0), reader.GetInt32(1));
+            }
+
+            return null;
+        }
+
+        private async Task UpdateSearchTermAsync(
+            NpgsqlConnection connection,
+            NpgsqlTransaction transaction,
+            Guid termId,
+            int currentCount)
+        {
+            var sql = _sqlHelper.UpdateSearchTermSql();
+            using var command = new NpgsqlCommand(sql, connection, transaction);
+
+            command.Parameters.AddWithValue("@SearchCount", currentCount + 1);
+            command.Parameters.AddWithValue("@LastSearchedAt", DateTime.UtcNow);
+            command.Parameters.AddWithValue("@Id", termId);
+
+            await command.ExecuteNonQueryAsync();
+        }
+
+        private async Task InsertSearchTermAsync(
+            NpgsqlConnection connection,
+            NpgsqlTransaction transaction,
+            string searchTerm)
+        {
+            var sql = _sqlHelper.InsertSearchTermSql();
+            using var command = new NpgsqlCommand(sql, connection, transaction);
+
+            command.Parameters.AddWithValue("@Id", Guid.NewGuid());
+            command.Parameters.AddWithValue("@Term", searchTerm.ToLower());
+            command.Parameters.AddWithValue("@SearchCount", 1);
+            command.Parameters.AddWithValue("@LastSearchedAt", DateTime.UtcNow);
+
+            await command.ExecuteNonQueryAsync();
+        }
+
 
         private async Task UpdateLastAccessedAsync(NpgsqlConnection connection, List<Guid> jokeIds)
         {
