@@ -2,7 +2,6 @@
 using Domain.Interfaces;
 using Domain.Services;
 using Infrastructure.Extensions;
-using Infrastructure.ExternalService;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

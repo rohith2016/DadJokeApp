@@ -15,8 +15,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
 
 // Register services from other layers
-builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
