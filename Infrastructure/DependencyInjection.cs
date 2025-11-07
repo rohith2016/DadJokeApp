@@ -23,7 +23,7 @@ namespace Infrastructure
             services.AddScoped<IJokeHighlighter, JokeHighlighter>();
 
             // Register configured HTTP client
-            services.AddDadJokeApiClient(configuration);
+            services.AddExternalApis(configuration);
 
             return services;
         }

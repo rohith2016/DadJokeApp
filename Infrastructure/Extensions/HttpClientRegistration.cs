@@ -8,9 +8,15 @@ namespace Infrastructure.Extensions
 {
     public static class HttpClientRegistration
     {
+        public static IServiceCollection AddExternalApis(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDadJokeApiClient(configuration);
+            return services;
+        }
+
         public static IServiceCollection AddDadJokeApiClient(this IServiceCollection services, IConfiguration configuration)
         {
-            var rateLimitSettings = configuration.GetSection("RateLimiting").Get<RateLimitSettings>()
+            var rateLimitSettings = configuration.GetSection("DadJokeApi:RateLimiting").Get<RateLimitSettings>()
                 ?? new RateLimitSettings();
             var policy = RateLimitPolicyFactory.Create(rateLimitSettings);
 
