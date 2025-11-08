@@ -1,3 +1,4 @@
+using Api.Middlewares;
 using Api.Validations;
 using Application;
 using FluentValidation;
@@ -15,8 +16,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddValidatorsFromAssemblyContaining<SearchRequestValidator>();
 
 // Register services from other layers
-builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.AddCoreServices(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
@@ -36,10 +37,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors("AllowAngular");
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular");
 
 app.UseAuthorization();
 

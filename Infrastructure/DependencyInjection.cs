@@ -2,7 +2,6 @@
 using Domain.Interfaces;
 using Domain.Services;
 using Infrastructure.Extensions;
-using Infrastructure.ExternalService;
 using Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +23,7 @@ namespace Infrastructure
             services.AddScoped<IJokeHighlighter, JokeHighlighter>();
 
             // Register configured HTTP client
-            services.AddDadJokeApiClient(configuration);
+            services.AddExternalApis(configuration);
 
             return services;
         }
