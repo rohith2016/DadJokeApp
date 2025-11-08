@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A077
 	ProjectSection(SolutionItems) = preProject
 		001_CreateJokesTable.sql = 001_CreateJokesTable.sql
 		002_CreateSearchTermsTable.sql = 002_CreateSearchTermsTable.sql
+		003_CreateUsersTable.sql = 003_CreateUsersTable.sql
 	EndProjectSection
 EndProject
 Global

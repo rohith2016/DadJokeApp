@@ -12,9 +12,12 @@ namespace Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
+            services.AddScoped<ICacheService, MemoryCacheService>();
+
+            services.AddScoped<IAuthService, AuthService>();
+
             services.AddScoped<IJokeService, JokeService>();
             services.AddScoped<IJokeSearchService, JokeSearchService>();
-            services.AddScoped<ICacheService, MemoryCacheService>();
 
 
             // Register domain services
