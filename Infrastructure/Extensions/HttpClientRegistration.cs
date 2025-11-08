@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Application.Interfaces;
 using Infrastructure.Extensions.Model;
 using Infrastructure.ExternalService;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +21,7 @@ namespace Infrastructure.Extensions
             var policy = RateLimitPolicyFactory.Create(rateLimitSettings);
 
 
-            services.AddHttpClient<IJokeApiClient, DadJokeApiClient>((_, client) =>
+            services.AddHttpClient<IJokeApiClient, DadJokeApiClient>(client =>
             {
                 var baseUrl = configuration["DadJokeApi:BaseUrl"] ?? "https://icanhazdadjoke.com/";
                 var timeout = configuration.GetValue<int>("DadJokeApi:Timeout", 30);
