@@ -1,5 +1,5 @@
 ﻿using Api.Controllers;
-using Application.DTOs;
+using Application.DTOs.RandomJoke;
 using Application.DTOs.Search;
 using Application.Interfaces;
 using FluentValidation;
