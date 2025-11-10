@@ -35,9 +35,6 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<JokeDTO>> GetRandomJoke()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = User.FindFirst(ClaimTypes.Name)?.Value;
-            _logger.LogInformation("User {UserId} ({Username}) fetching a random joke...", userId, username);
             _logger.LogInformation("Fetching a random joke...");
             var joke = await _jokeService.GetRandomJokeAsync();
             _logger.LogInformation("Successfully fetched random joke with ID {JokeId}", joke.Id);

@@ -32,6 +32,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A077
 		003_CreateUsersTable.sql = 003_CreateUsersTable.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{8EB11A3A-1E6A-4761-936E-8E150C1BE977}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{B15391B2-25C1-4249-92CE-7BFCA7A22E86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B15391B2-25C1-4249-92CE-7BFCA7A22E86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B15391B2-25C1-4249-92CE-7BFCA7A22E86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EB11A3A-1E6A-4761-936E-8E150C1BE977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB11A3A-1E6A-4761-936E-8E150C1BE977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EB11A3A-1E6A-4761-936E-8E150C1BE977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EB11A3A-1E6A-4761-936E-8E150C1BE977}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{81E45238-80F4-4973-83AE-851B1DCBE9C2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B15391B2-25C1-4249-92CE-7BFCA7A22E86} = {51DC4EA6-964D-4BC3-8F07-4BAB1AB0199E}
 		{A077E20C-4071-4F92-A46C-72A1FA25405A} = {61C57658-936F-4E89-A1BD-00304F07B313}
+		{8EB11A3A-1E6A-4761-936E-8E150C1BE977} = {51DC4EA6-964D-4BC3-8F07-4BAB1AB0199E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6653F7F1-5C1F-4574-9786-00A7F1ECE844}
