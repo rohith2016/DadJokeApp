@@ -26,16 +26,17 @@ namespace Api.Controllers
             var validationResult = ValidateRequest<SignupRequest>(request);
             if (!validationResult.IsValid)
             {
-                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
-            
-            var result = await _authService.SignupAsync(request.Username, request.Email, request.Password);
-            if (!result.Success)
-            {
-                return BadRequest(new { message = result.ErrorMessage });
+                var validationErrors = validationResult.Errors
+                   .Select(e => e.ErrorMessage)
+                   .ToArray();
+                return BadRequest(AuthResponseDTO<AuthResult>.FromError(validationErrors));
             }
 
-            return Ok(new { result.Token, result.UserName });
+            var result = await _authService.SignupAsync(request.Username, request.Email, request.Password);
+            if (!result.Success)
+                return BadRequest(AuthResponseDTO<AuthResult>.FromError(result.ErrorMessage));
+
+            return Ok(AuthResponseDTO<AuthResult>.FromSuccess(result));
         }
 
         [HttpPost("login")]
@@ -44,17 +45,20 @@ namespace Api.Controllers
             var validationResult = ValidateRequest<LoginRequest>(request);
             if (!validationResult.IsValid)
             {
-                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+                var validationErrors = validationResult.Errors
+                    .Select(e => e.ErrorMessage)
+                    .ToArray();
+                return BadRequest(AuthResponseDTO<AuthResult>.FromError(validationErrors));
             }
+               
 
             var result = await _authService.LoginAsync(request.Email, request.Password);
             if (!result.Success)
-            {
-                return Unauthorized(new { message = result.ErrorMessage });
-            }
+                return Unauthorized(AuthResponseDTO<AuthResult>.FromError(result.ErrorMessage));
 
-            return Ok(new { result.Token, result.UserName });
+            return Ok(AuthResponseDTO<AuthResult>.FromSuccess(result));
         }
+
 
         private ValidationResult ValidateRequest<T>(T request)
         {
