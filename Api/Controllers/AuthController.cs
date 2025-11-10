@@ -2,6 +2,7 @@
 using Application.DTOs.User;
 using Application.Interfaces;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -22,14 +23,13 @@ namespace Api.Controllers
         [HttpPost("signup")]
         public async Task<IActionResult> Signup([FromBody] SignupRequest request)
         {
-            var validator = _serviceProvider.GetRequiredService<IValidator<SignupRequest>>();
-            var validationResult = await validator.ValidateAsync(request);
+            var validationResult = ValidateRequest<SignupRequest>(request);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
             }
+            
             var result = await _authService.SignupAsync(request.Username, request.Email, request.Password);
-
             if (!result.Success)
             {
                 return BadRequest(new { message = result.ErrorMessage });
@@ -41,14 +41,25 @@ namespace Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var result = await _authService.LoginAsync(request.Email, request.Password);
+            var validationResult = ValidateRequest<LoginRequest>(request);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
 
+            var result = await _authService.LoginAsync(request.Email, request.Password);
             if (!result.Success)
             {
                 return Unauthorized(new { message = result.ErrorMessage });
             }
 
             return Ok(new { result.Token, result.UserName });
+        }
+
+        private ValidationResult ValidateRequest<T>(T request)
+        {
+            var validator = _serviceProvider.GetRequiredService<IValidator<T>>();
+            return validator.Validate(request);
         }
     }
 }

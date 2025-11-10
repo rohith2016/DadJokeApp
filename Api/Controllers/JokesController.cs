@@ -2,7 +2,6 @@
 using Application.DTOs.Search;
 using Application.Interfaces;
 using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -10,7 +9,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/jokes")]
-    [Authorize]
+    //[Authorize]
     public class JokesController : ControllerBase
     {
         private readonly IJokeService _jokeService;

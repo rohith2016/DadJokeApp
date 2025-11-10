@@ -14,7 +14,7 @@ namespace Infrastructure
         public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Register helpers
-            services.AddSingleton<DadJokesDBHelper>();
+            services.AddSingleton<JokesRepositoryHelper>();
 
             // Register repositories
             services.AddScoped<IJokeRepository, JokeRepository>();
