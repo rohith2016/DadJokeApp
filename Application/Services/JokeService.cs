@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.RandomJoke;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;

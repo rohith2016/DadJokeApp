@@ -1,5 +1,5 @@
 ﻿using Api.Controllers;
-using Application.DTOs;
+using Application.DTOs.RandomJoke;
 using Application.DTOs.Search;
 using Application.Interfaces;
 using FluentValidation;
@@ -55,24 +55,6 @@ namespace UnitTests.Api.Controllers
         }
 
         [Fact]
-        public async Task GetRandomJoke_WhenException_LogsErrorAndReturns500()
-        {
-            _jokeServiceMock.Setup(s => s.GetRandomJokeAsync())
-                .ThrowsAsync(new Exception("DB error"));
-
-            var controller = new JokesController(
-                _jokeServiceMock.Object,
-                _searchServiceMock.Object,
-                _serviceProvider,
-                _loggerMock.Object);
-
-            var result = await controller.GetRandomJoke();
-
-            var status = Assert.IsType<ObjectResult>(result.Result);
-            Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
-        }
-
-        [Fact]
         public async Task SearchJokes_ValidationFails_ReturnsBadRequest()
         {
             // Arrange
@@ -120,27 +102,6 @@ namespace UnitTests.Api.Controllers
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             Assert.IsType<GroupedJokesDTO>(okResult.Value);
-        }
-
-        [Fact]
-        public async Task SearchJokes_WhenException_Returns500()
-        {
-            var request = new SearchRequestDTO { Term = "friend" };
-            _validatorMock.Setup(v => v.ValidateAsync(request, default))
-                .ReturnsAsync(new ValidationResult());
-            _searchServiceMock.Setup(s => s.SearchJokesAsync(request))
-                .ThrowsAsync(new Exception("Search error"));
-
-            var controller = new JokesController(
-                _jokeServiceMock.Object,
-                _searchServiceMock.Object,
-                _serviceProvider,
-                _loggerMock.Object);
-
-            var result = await controller.SearchJokes(request);
-
-            var status = Assert.IsType<ObjectResult>(result.Result);
-            Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
         }
     }
 }

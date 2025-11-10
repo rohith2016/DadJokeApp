@@ -1,7 +1,7 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces;
+using Domain.Entities;
 using Domain.Enum;
 using Domain.Helpers;
-using Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -12,10 +12,10 @@ namespace Infrastructure.Repositories
     {
         private readonly IConfiguration _config;
         private readonly string _connectionString;
-        private readonly DadJokesDBHelper _sqlHelper;
+        private readonly JokesRepositoryHelper _sqlHelper;
         private readonly ILogger<JokeRepository> _logger;
 
-        public JokeRepository(IConfiguration config, DadJokesDBHelper helper, ILogger<JokeRepository> logger)
+        public JokeRepository(IConfiguration config, JokesRepositoryHelper helper, ILogger<JokeRepository> logger)
         {
             _config = config;
             _connectionString = _config.GetConnectionString("DefaultConnection") ?? "";

@@ -1,4 +1,6 @@
-﻿namespace Application.DTOs
+﻿using Application.DTOs.RandomJoke;
+
+namespace Application.DTOs.Search
 {
     public class GroupedJokesDTO
     {

@@ -1,13 +1,15 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.RandomJoke;
 using Application.DTOs.Search;
 using Application.Interfaces;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("api/jokes")]
+    //[Authorize]
     public class JokesController : ControllerBase
     {
         private readonly IJokeService _jokeService;
@@ -29,6 +31,7 @@ namespace Api.Controllers
 
         [HttpGet("random")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<JokeDTO>> GetRandomJoke()
         {
@@ -41,6 +44,7 @@ namespace Api.Controllers
         [HttpPost("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<GroupedJokesDTO>> SearchJokes([FromBody] SearchRequestDTO searchRequest)
         {

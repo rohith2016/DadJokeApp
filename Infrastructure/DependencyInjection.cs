@@ -1,8 +1,10 @@
-﻿using Domain.Helpers;
+﻿using Application.Interfaces;
+using Domain.Helpers;
 using Domain.Interfaces;
-using Domain.Services;
 using Infrastructure.Extensions;
+using Infrastructure.Helpers;
 using Infrastructure.Repositories;
+using Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,14 +15,15 @@ namespace Infrastructure
         public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Register helpers
-            services.AddSingleton<DadJokesDBHelper>();
+            services.AddSingleton<JokesRepositoryHelper>();
+            services.AddSingleton<UserRepositoryHelper>();
+
 
             // Register repositories
             services.AddScoped<IJokeRepository, JokeRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
-            // Register domain services
-            services.AddScoped<IJokeClassifier, JokeClassifier>();
-            services.AddScoped<IJokeHighlighter, JokeHighlighter>();
 
             // Register configured HTTP client
             services.AddExternalApis(configuration);

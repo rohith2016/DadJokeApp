@@ -1,19 +1,14 @@
 ﻿using Domain.Entities;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Helpers
 {
-    internal class DadJokesDBHelper
+    internal class JokesRepositoryHelper
     {
         private readonly string _jokesTable;
         private readonly string _searchTermsTable;
 
-        public DadJokesDBHelper(IConfiguration configuration)
+        public JokesRepositoryHelper(IConfiguration configuration)
         {
             _jokesTable = configuration["JokesTable"] ?? "Jokes";
             _searchTermsTable = configuration["SearchTermsTable"] ?? "SearchTerms";

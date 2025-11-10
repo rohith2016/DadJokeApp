@@ -21,6 +21,13 @@ namespace Api.Middlewares
             {
                 await _next(context);
             }
+            catch(UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access for Dad Joke API.");
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                var result = JsonSerializer.Serialize(new { error = ex.Message });
+                await context.Response.WriteAsync(result);
+            }
             catch (TooManyRequestsException ex)
             {
                 _logger.LogWarning(ex, "Rate limit exceeded for Dad Joke API.");
