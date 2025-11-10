@@ -67,17 +67,17 @@ namespace Application.Services
             };
         }
 
-        private string HashPassword(string password)
+        private static string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password, 12);
         }
 
-        private bool VerifyPassword(string password, string hash)
+        private static bool VerifyPassword(string password, string hash)
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
 
-        private string HashEmail(string email)
+        private static string HashEmail(string email)
         {
             using var sha256 = SHA256.Create();
             var emailBytes = Encoding.UTF8.GetBytes(email.ToLowerInvariant());

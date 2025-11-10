@@ -13,7 +13,7 @@ namespace Infrastructure.Security
 
         public JwtTokenGenerator(IConfiguration config)
         {
-            _jwtSecret = config["Jwt:Secret"];
+            _jwtSecret = config["Jwt:Secret"] ?? "";
         }
 
         public string GenerateToken(int userId, string username, string email)

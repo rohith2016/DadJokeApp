@@ -2,6 +2,7 @@
 using Domain.Helpers;
 using Domain.Interfaces;
 using Infrastructure.Extensions;
+using Infrastructure.Helpers;
 using Infrastructure.Repositories;
 using Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,8 @@ namespace Infrastructure
         {
             // Register helpers
             services.AddSingleton<JokesRepositoryHelper>();
+            services.AddSingleton<UserRepositoryHelper>();
+
 
             // Register repositories
             services.AddScoped<IJokeRepository, JokeRepository>();
